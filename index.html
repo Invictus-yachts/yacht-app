@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invictus Yacht Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --deep: #0d1f3c;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --white: #f8f6f1;
+    --gray: #8a9bb0;
+    --light: #e8edf3;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg-texture {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(10,22,40,0.8) 0%, transparent 50%),
+      linear-gradient(135deg, #0a1628 0%, #0d1f3c 50%, #091525 100%);
+  }
+  .bg-texture::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  /* ── SCREENS ── */
+  .screen { position: relative; z-index: 1; min-height: 100vh; display: none; }
+  .screen.active { display: flex; }
+
+  /* ══════════════════════════════════════
+     LOGIN SCREEN
+  ══════════════════════════════════════ */
+  #login-screen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(13,31,60,0.8);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 2px;
+    padding: 3rem 2.5rem;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,168,76,0.1);
+    animation: fadeUp 0.8s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .logo-anchor {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 0 20px rgba(201,168,76,0.4));
+  }
+
+  .logo-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: var(--white);
+  }
+
+  .logo-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(201,168,76,0.2);
+  }
+  .divider span { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--gold); }
+
+  .form-group { margin-bottom: 1.2rem; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 0.5rem;
+  }
+
+  .form-group input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1px;
+    padding: 0.85rem 1rem;
+    color: var(--white);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    transition: all 0.3s;
+    outline: none;
+  }
+
+  .form-group input:focus {
+    border-color: rgba(201,168,76,0.5);
+    background: rgba(201,168,76,0.05);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+  }
+
+  .btn-login {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    background-size: 200% 100%;
+    border: none;
+    border-radius: 1px;
+    padding: 1rem;
+    color: var(--navy);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.4s;
+    margin-top: 0.5rem;
+  }
+
+  .btn-login:hover {
+    background-position: 100% 0;
+    box-shadow: 0 8px 30px rgba(201,168,76,0.3);
+    transform: translateY(-1px);
+  }
+
+  .error-msg {
+    color: #e74c3c;
+    font-size: 0.75rem;
+    text-align: center;
+    margin-top: 1rem;
+    display: none;
+  }
+
+  /* ══════════════════════════════════════
+     CONFIG SCREEN (Token setup)
+  ══════════════════════════════════════ */
+  #config-screen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .config-card {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(13,31,60,0.8);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 2px;
+    padding: 3rem 2.5rem;
+    backdrop-filter: blur(20px);
+    animation: fadeUp 0.8s ease;
+  }
+
+  .config-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+  }
+
+  .config-sub {
+    font-size: 0.75rem;
+    color: var(--gray);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .token-input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1px;
+    padding: 0.85rem 1rem;
+    color: var(--white);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 300;
+    margin-bottom: 1rem;
+    outline: none;
+    transition: all 0.3s;
+  }
+
+  .token-input:focus {
+    border-color: rgba(201,168,76,0.5);
+    background: rgba(201,168,76,0.05);
+  }
+
+  .info-box {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 2px;
+    padding: 1rem;
+    font-size: 0.75rem;
+    color: var(--gray);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-box strong { color: var(--gold); }
+
+  /* ══════════════════════════════════════
+     MAIN APP
+  ══════════════════════════════════════ */
+  #app-screen {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(10,22,40,0.9);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .header-logo span { color: var(--gold); }
+
+  .header-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 20px;
+    padding: 0.4rem 1rem;
+    font-size: 0.75rem;
+    color: var(--gold);
+  }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1px;
+    padding: 0.4rem 1rem;
+    color: var(--gray);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Nav tabs */
+  .app-nav {
+    display: flex;
+    gap: 0;
+    background: rgba(13,31,60,0.5);
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    padding: 0 2rem;
+    overflow-x: auto;
+  }
+
+  .nav-tab {
+    padding: 1rem 1.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+    white-space: nowrap;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    font-family: 'Jost', sans-serif;
+  }
+
+  .nav-tab:hover { color: var(--white); }
+  .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* Content */
+  .app-content {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Tab panels */
+  .tab-panel { display: none; animation: fadeUp 0.4s ease; }
+  .tab-panel.active { display: block; }
+
+  /* Section title */
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    margin-bottom: 0.3rem;
+  }
+
+  .section-sub {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+  }
+
+  /* Cards grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .info-card {
+    background: rgba(13,31,60,0.6);
+    border: 1px solid rgba(201,168,76,0.12);
+    border-radius: 2px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+
+  .info-card:hover {
+    border-color: rgba(201,168,76,0.3);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+  }
+
+  .card-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .card-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--white);
+  }
+
+  .card-sub {
+    font-size: 0.75rem;
+    color: var(--gray);
+    margin-top: 0.3rem;
+  }
+
+  /* Yacht hero card */
+  .yacht-hero {
+    background: linear-gradient(135deg, rgba(13,31,60,0.9) 0%, rgba(201,168,76,0.05) 100%);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 2px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .yacht-hero::before {
+    content: '⚓';
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8rem;
+    opacity: 0.04;
+  }
+
+  .yacht-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .yacht-type {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+  }
+
+  .yacht-stats {
+    display: flex;
+    gap: 3rem;
+    margin-top: 1.5rem;
+  }
+
+  .stat { }
+  .stat-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--gold);
+  }
+  .stat-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  /* Work list table */
+  .works-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .works-table th {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    font-weight: 400;
+  }
+
+  .works-table td {
+    padding: 1rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--light);
+    font-weight: 300;
+  }
+
+  .works-table tr:hover td { background: rgba(201,168,76,0.03); }
+
+  .priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
+  .priority-high { background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+  .priority-medium { background: rgba(243,156,18,0.15); color: #f39c12; border: 1px solid rgba(243,156,18,0.3); }
+  .priority-low { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+  }
+
+  .status-not-started { background: rgba(138,155,176,0.15); color: var(--gray); }
+  .status-in-progress { background: rgba(52,152,219,0.15); color: #3498db; }
+  .status-done { background: rgba(46,204,113,0.15); color: #2ecc71; }
+
+  .zone-tag {
+    font-size: 0.65rem;
+    color: var(--gray);
+    background: rgba(255,255,255,0.05);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+  }
+
+  /* Machinery cards */
+  .machinery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .machine-card {
+    background: rgba(13,31,60,0.6);
+    border: 1px solid rgba(201,168,76,0.12);
+    border-radius: 2px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .machine-card:hover {
+    border-color: rgba(201,168,76,0.35);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    transform: translateY(-3px);
+  }
+
+  .machine-type {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .machine-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+  }
+
+  .machine-specs { }
+  .spec-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.75rem;
+  }
+  .spec-row:last-child { border-bottom: none; }
+  .spec-key { color: var(--gray); }
+  .spec-val { color: var(--light); font-weight: 400; }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  .filter-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 0.3rem 0.9rem;
+    color: var(--gray);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: rgba(201,168,76,0.15);
+    border-color: rgba(201,168,76,0.4);
+    color: var(--gold);
+  }
+
+  /* Loading */
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    gap: 1rem;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(201,168,76,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 4rem;
+    color: var(--gray);
+  }
+
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+  .empty-text { font-size: 0.8rem; letter-spacing: 0.1em; }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: rgba(13,31,60,0.6);
+    border: 1px solid rgba(201,168,76,0.1);
+    border-radius: 2px;
+    padding: 1.2rem 1.5rem;
+    text-align: center;
+  }
+
+  .stat-card-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    font-weight: 300;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-card-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-top: 0.3rem;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    backdrop-filter: blur(5px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--deep);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 2px;
+    padding: 2.5rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin-bottom: 0.3rem;
+  }
+
+  .modal-type {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--gray);
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-top: -0.5rem;
+  }
+
+  /* Admin fleet grid */
+  .fleet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .yacht-card {
+    background: rgba(13,31,60,0.6);
+    border: 1px solid rgba(201,168,76,0.12);
+    border-radius: 2px;
+    padding: 2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .yacht-card::before {
+    content: '⚓';
+    position: absolute;
+    right: 1rem;
+    bottom: 0.5rem;
+    font-size: 4rem;
+    opacity: 0.04;
+  }
+
+  .yacht-card:hover {
+    border-color: rgba(201,168,76,0.35);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+
+  .yacht-card-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin-bottom: 0.3rem;
+  }
+
+  .yacht-card-owner {
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .yacht-card-specs {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .yacht-spec { }
+  .yacht-spec-val { font-size: 0.9rem; color: var(--white); }
+  .yacht-spec-label { font-size: 0.6rem; color: var(--gray); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .app-header { padding: 1rem; }
+    .app-content { padding: 1rem; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .yacht-hero { flex-direction: column; gap: 1.5rem; }
+    .yacht-stats { flex-wrap: wrap; gap: 1.5rem; }
+    .yacht-name { font-size: 2rem; }
+    .works-table { display: block; overflow-x: auto; }
+    .header-logo { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-texture"></div>
+
+<!-- ══════════════ CONFIG SCREEN ══════════════ -->
+<div id="config-screen" class="screen">
+  <div class="config-card">
+    <div class="login-logo">
+      <div class="logo-anchor">⚓</div>
+      <div class="logo-title">INVICTUS</div>
+      <div class="logo-sub">Yacht Management System</div>
+    </div>
+    <div class="divider"><span>Setup</span></div>
+    <p class="config-sub">Enter your Notion API token to connect the app to your database. This is stored locally and never shared.</p>
+    
+    <div class="info-box">
+      <strong>Database IDs configured:</strong><br>
+      Yacht: 3113f76ca005801db820ed144822f263<br>
+      Machinery: 3233f76ca005804cab4bdc04622af8ee
+    </div>
+
+    <div class="form-group">
+      <label>Notion API Token</label>
+      <input type="password" id="token-input" class="token-input" placeholder="ntn_xxxxxxxxxxxx..." />
+    </div>
+    <button class="btn-login" onclick="saveToken()">CONNECT & SAVE</button>
+    <p class="error-msg" id="token-error">Invalid token. Please check and try again.</p>
+  </div>
+</div>
+
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div id="login-screen" class="screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-anchor">⚓</div>
+      <div class="logo-title">INVICTUS</div>
+      <div class="logo-sub">Yacht Management System</div>
+    </div>
+    <div class="divider"><span>Access Portal</span></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="owner@example.com" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" />
+    </div>
+    <button class="btn-login" onclick="handleLogin()">SIGN IN</button>
+    <p class="error-msg" id="login-error">Invalid credentials. Please try again.</p>
+    <p style="text-align:center; margin-top:1.5rem; font-size:0.7rem; color: var(--gray);">
+      <a href="#" onclick="showConfig()" style="color:var(--gold); text-decoration:none;">⚙ Configure API</a>
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════ APP SCREEN ══════════════ -->
+<div id="app-screen" class="screen" style="flex-direction:column;">
+  
+  <header class="app-header">
+    <div class="header-logo">
+      ⚓ <span>INVICTUS</span> <span style="color:var(--gray); font-size:0.8rem; font-family:'Jost'; font-weight:200;">Yacht Management</span>
+    </div>
+    <div class="header-user">
+      <div class="user-badge" id="user-badge">👤 Admin</div>
+      <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <nav class="app-nav" id="app-nav">
+    <button class="nav-tab active" onclick="switchTab('overview')">Overview</button>
+    <button class="nav-tab" onclick="switchTab('worklist')" id="tab-worklist">Work List</button>
+    <button class="nav-tab" onclick="switchTab('machinery')">Machinery</button>
+    <button class="nav-tab admin-only" onclick="switchTab('fleet')" id="tab-fleet" style="display:none;">Fleet</button>
+  </nav>
+
+  <main class="app-content">
+    
+    <!-- OVERVIEW TAB -->
+    <div class="tab-panel active" id="panel-overview">
+      <div id="overview-loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading vessel data...</div>
+      </div>
+      <div id="overview-content" style="display:none;">
+        <div class="yacht-hero" id="yacht-hero"></div>
+        <div class="stats-bar" id="stats-bar"></div>
+        <div class="cards-grid" id="specs-grid"></div>
+      </div>
+    </div>
+
+    <!-- WORK LIST TAB -->
+    <div class="tab-panel" id="panel-worklist">
+      <div class="section-title">Work List</div>
+      <div class="section-sub">Active maintenance tasks and repairs</div>
+      
+      <div class="filters" id="work-filters">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" onclick="filterWorks('all', this)">All</button>
+        <button class="filter-btn" onclick="filterWorks('High', this)">🔴 High</button>
+        <button class="filter-btn" onclick="filterWorks('Medium', this)">🟡 Medium</button>
+        <button class="filter-btn" onclick="filterWorks('Low', this)">🟢 Low</button>
+        <button class="filter-btn" onclick="filterWorks('Not started', this)">⬜ Not Started</button>
+        <button class="filter-btn" onclick="filterWorks('In progress', this)">🔄 In Progress</button>
+        <button class="filter-btn" onclick="filterWorks('Done', this)">✅ Done</button>
+      </div>
+
+      <div id="worklist-loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading work list...</div>
+      </div>
+
+      <div id="worklist-content" style="display:none; overflow-x:auto;">
+        <table class="works-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Zone</th>
+              <th>Area</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Assigned To</th>
+            </tr>
+          </thead>
+          <tbody id="works-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MACHINERY TAB -->
+    <div class="tab-panel" id="panel-machinery">
+      <div class="section-title">Machinery</div>
+      <div class="section-sub">Equipment specifications and status</div>
+
+      <div id="machinery-loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading machinery data...</div>
+      </div>
+
+      <div class="machinery-grid" id="machinery-grid" style="display:none;"></div>
+    </div>
+
+    <!-- FLEET TAB (Admin only) -->
+    <div class="tab-panel" id="panel-fleet">
+      <div class="section-title">Fleet Overview</div>
+      <div class="section-sub">All vessels under management</div>
+
+      <div id="fleet-loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading fleet data...</div>
+      </div>
+
+      <div class="fleet-grid" id="fleet-grid" style="display:none;"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Machine detail modal -->
+<div class="modal-overlay" id="machine-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-type" id="modal-type"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-specs"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// CONFIG & STATE
+// ══════════════════════════════════════
+const YACHT_DB_ID = '3113f76ca005801db820ed144822f263';
+const MACHINERY_DB_ID = '3233f76ca005804cab4bdc04622af8ee';
+const NOTION_API = 'https://api.anthropic.com/v1/messages';
+
+// Users config — ADD YOUR CLIENTS HERE
+const USERS = {
+  'admin@invictus.com': { password: 'admin2024', role: 'admin', name: 'Admin', yacht: null },
+  'bellakatrin@owner.com': { password: 'bellakatrin2024', role: 'client', name: 'Utmost Ventures Ltd', yacht: 'Bella Katrin' },
+  'purity@owner.com': { password: 'purity2024', role: 'client', name: 'Riva Umberto', yacht: 'Purity' },
+  'getlucky@owner.com': { password: 'getlucky2024', role: 'client', name: 'Spanier/Montrucchio', yacht: 'Get Lucky' },
+  'mahana@owner.com': { password: 'mahana2024', role: 'client', name: 'Richelmi Stephane', yacht: 'Mahana' },
+};
+
+let currentUser = null;
+let notionToken = null;
+let allWorks = [];
+let currentYachtId = null;
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.onload = () => {
+  notionToken = localStorage.getItem('notion_token');
+  const savedUser = localStorage.getItem('current_user');
+  
+  if (savedUser) {
+    currentUser = JSON.parse(savedUser);
+    if (!notionToken) { showConfig(); return; }
+    showApp();
+  } else if (!notionToken) {
+    showConfig();
+  } else {
+    showScreen('login-screen');
+  }
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showConfig() { showScreen('config-screen'); }
+
+async function saveToken() {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token || !token.startsWith('ntn_') && !token.startsWith('secret_')) {
+    document.getElementById('token-error').style.display = 'block';
+    return;
+  }
+  localStorage.setItem('notion_token', token);
+  notionToken = token;
+  showScreen('login-screen');
+}
+
+// ══════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════
+function handleLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const user = USERS[email];
+  
+  if (!user || user.password !== password) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  
+  currentUser = { email, ...user };
+  localStorage.setItem('current_user', JSON.stringify(currentUser));
+  showApp();
+}
+
+function handleLogout() {
+  currentUser = null;
+  localStorage.removeItem('current_user');
+  showScreen('login-screen');
+}
+
+function showApp() {
+  showScreen('app-screen');
+  document.getElementById('user-badge').innerHTML = `👤 ${currentUser.name}`;
+  
+  if (currentUser.role === 'admin') {
+    document.getElementById('tab-fleet').style.display = 'flex';
+  }
+  
+  loadOverview();
+}
+
+// ══════════════════════════════════════
+// NOTION API
+// ══════════════════════════════════════
+async function notionAPI(path, method, body) {
+  try {
+    const response = await fetch('/api/notion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-notion-token': notionToken },
+      body: JSON.stringify({ path, method: method || 'GET', body })
+    });
+    if (!response.ok) throw new Error('API error');
+    return await response.json();
+  } catch (e) {
+    console.error('Notion API error:', e);
+    return null;
+  }
+}
+
+async function notionQuery(databaseId, filter = null) {
+  const body = { page_size: 100 };
+  if (filter) body.filter = filter;
+  return await notionAPI('/v1/databases/' + databaseId + '/query', 'POST', body);
+}
+
+async function notionGetPage(pageId) {
+  return await notionAPI('/v1/pages/' + pageId, 'GET', null);
+}
+
+async function notionGetBlocks(pageId) {
+  return await notionAPI('/v1/blocks/' + pageId + '/children', 'GET', null);
+}
+
+function getProp(props, key, type = 'rich_text') {
+  const prop = props[key];
+  if (!prop) return '—';
+  
+  switch(type) {
+    case 'title': return prop.title?.[0]?.plain_text || '—';
+    case 'rich_text': return prop.rich_text?.[0]?.plain_text || '—';
+    case 'select': return prop.select?.name || '—';
+    case 'number': return prop.number?.toString() || '—';
+    case 'date': return prop.date?.start || '—';
+    case 'people': return prop.people?.map(p => p.name).join(', ') || '—';
+    case 'relation': return prop.relation?.map(r => r.id) || [];
+    default: return '—';
+  }
+}
+
+// ══════════════════════════════════════
+// OVERVIEW
+// ══════════════════════════════════════
+async function loadOverview() {
+  document.getElementById('overview-loading').style.display = 'flex';
+  document.getElementById('overview-content').style.display = 'none';
+
+  let yachtData = null;
+
+  if (currentUser.role === 'admin') {
+    // Admin sees first yacht or summary
+    const data = await notionQuery(YACHT_DB_ID);
+    if (data?.results?.length) yachtData = data.results[0];
+  } else {
+    // Client sees their yacht
+    const data = await notionQuery(YACHT_DB_ID, {
+      property: 'Nome yacht',
+      title: { equals: currentUser.yacht }
+    });
+    if (data?.results?.length) yachtData = data.results[0];
+  }
+
+  if (!yachtData) {
+    document.getElementById('overview-loading').style.display = 'none';
+    document.getElementById('overview-content').style.display = 'block';
+    document.getElementById('yacht-hero').innerHTML = '<div class="empty-state"><div class="empty-icon">🚢</div><div class="empty-text">No vessel data found</div></div>';
+    return;
+  }
+
+  currentYachtId = yachtData.id;
+  const p = yachtData.properties;
+  const name = getProp(p, 'Nome yacht', 'title');
+  const owner = getProp(p, 'Owner', 'rich_text');
+  const year = getProp(p, 'Building year', 'rich_text');
+  const size = getProp(p, 'Size', 'rich_text');
+  const manufacturer = getProp(p, 'Manufacturer', 'rich_text');
+  const model = getProp(p, 'Model', 'rich_text');
+  const engines = getProp(p, 'Engines', 'rich_text');
+  const porto = getProp(p, 'Porto base', 'rich_text');
+
+  // Hero
+  document.getElementById('yacht-hero').innerHTML = `
+    <div>
+      <div class="yacht-name">${name}</div>
+      <div class="yacht-type">${manufacturer} ${model} · ${year}</div>
+      <div class="yacht-stats">
+        <div class="stat"><div class="stat-val">${size.split('x')[0]?.trim() || '—'}m</div><div class="stat-label">Length</div></div>
+        <div class="stat"><div class="stat-val">${year}</div><div class="stat-label">Built</div></div>
+        <div class="stat"><div class="stat-val">${porto}</div><div class="stat-label">Home Port</div></div>
+      </div>
+    </div>
+  `;
+
+  // Specs grid
+  document.getElementById('specs-grid').innerHTML = `
+    <div class="info-card"><div class="card-label">Owner</div><div class="card-value" style="font-size:1.1rem">${owner}</div></div>
+    <div class="info-card"><div class="card-label">Engines</div><div class="card-value" style="font-size:1.1rem">${engines}</div></div>
+    <div class="info-card"><div class="card-label">Home Port</div><div class="card-value" style="font-size:1.1rem">${porto}</div></div>
+    <div class="info-card"><div class="card-label">Size</div><div class="card-value" style="font-size:1.1rem">${size}</div></div>
+  `;
+
+  // Load work stats
+  await loadWorkStats();
+
+  document.getElementById('overview-loading').style.display = 'none';
+  document.getElementById('overview-content').style.display = 'block';
+}
+
+async function loadWorkStats() {
+  const yachtName = currentUser.role === 'admin' ? null : currentUser.yacht;
+  const data = await notionQuery(YACHT_DB_ID);
+  
+  // Get works from bella katrin's works list
+  const worksData = await notionQuery(MACHINERY_DB_ID);
+  
+  let high = 0, inProgress = 0, done = 0, total = 0;
+  
+  if (allWorks.length > 0) {
+    total = allWorks.length;
+    high = allWorks.filter(w => {
+      const p = getProp(w.properties, 'Priority', 'select');
+      return p.toLowerCase().includes('high');
+    }).length;
+    inProgress = allWorks.filter(w => {
+      const s = getProp(w.properties, 'Status', 'select');
+      return s.toLowerCase().includes('progress');
+    }).length;
+    done = allWorks.filter(w => {
+      const s = getProp(w.properties, 'Status', 'select');
+      return s.toLowerCase().includes('done');
+    }).length;
+  }
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-card"><div class="stat-card-val">${total}</div><div class="stat-card-label">Total Works</div></div>
+    <div class="stat-card"><div class="stat-card-val" style="color:#e74c3c">${high}</div><div class="stat-card-label">High Priority</div></div>
+    <div class="stat-card"><div class="stat-card-val" style="color:#3498db">${inProgress}</div><div class="stat-card-label">In Progress</div></div>
+    <div class="stat-card"><div class="stat-card-val" style="color:#2ecc71">${done}</div><div class="stat-card-label">Completed</div></div>
+  `;
+}
+
+// ══════════════════════════════════════
+// WORK LIST
+// ══════════════════════════════════════
+async function loadWorklist() {
+  document.getElementById('worklist-loading').style.display = 'flex';
+  document.getElementById('worklist-content').style.display = 'none';
+
+  // Find bella katrin page and get its works list
+  const yachtData = await notionQuery(YACHT_DB_ID);
+  let targetYacht = null;
+  
+  if (yachtData?.results) {
+    if (currentUser.role === 'admin') {
+      targetYacht = yachtData.results[0];
+    } else {
+      targetYacht = yachtData.results.find(y => {
+        const name = getProp(y.properties, 'Nome yacht', 'title');
+        return name === currentUser.yacht;
+      });
+    }
+  }
+
+  // Query the works list database - look for inline database in bella katrin
+  // Since Works list is inline in Bella Katrin page, we need to search blocks
+  if (targetYacht) {
+    const blocks = await notionGetBlocks(targetYacht.id);
+    if (blocks) {
+      // Find child database block
+      const dbBlock = blocks.results?.find(b => b.type === 'child_database');
+      
+      if (dbBlock) {
+        const worksData = await notionQuery(dbBlock.id);
+        if (worksData?.results) {
+          allWorks = worksData.results;
+          renderWorks(allWorks);
+        }
+      }
+    }
+  }
+
+  document.getElementById('worklist-loading').style.display = 'none';
+  document.getElementById('worklist-content').style.display = 'block';
+}
+
+function renderWorks(works) {
+  const tbody = document.getElementById('works-tbody');
+  
+  if (!works.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No works found</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = works.map(w => {
+    const p = w.properties;
+    const desc = getProp(p, 'Work description', 'title');
+    const zone = getProp(p, 'Zone', 'select');
+    const area = getProp(p, 'Area', 'select');
+    const priority = getProp(p, 'Priority', 'select');
+    const status = getProp(p, 'Status', 'select');
+    const assigned = getProp(p, 'Assigned to', 'people');
+
+    const priorityClass = priority.toLowerCase().includes('high') ? 'high' : 
+                          priority.toLowerCase().includes('medium') ? 'medium' : 'low';
+    
+    const statusClass = status.toLowerCase().includes('progress') ? 'in-progress' :
+                        status.toLowerCase().includes('done') ? 'done' : 'not-started';
+
+    return `
+      <tr>
+        <td>${desc}</td>
+        <td><span class="zone-tag">${zone}</span></td>
+        <td>${area}</td>
+        <td><span class="priority-badge priority-${priorityClass}">${priority}</span></td>
+        <td><span class="status-badge status-${statusClass}">${status}</span></td>
+        <td style="color:var(--gray)">${assigned}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterWorks(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  if (filter === 'all') { renderWorks(allWorks); return; }
+  
+  const filtered = allWorks.filter(w => {
+    const priority = getProp(w.properties, 'Priority', 'select');
+    const status = getProp(w.properties, 'Status', 'select');
+    return priority.toLowerCase().includes(filter.toLowerCase()) || 
+           status.toLowerCase().includes(filter.toLowerCase());
+  });
+  
+  renderWorks(filtered);
+}
+
+// ══════════════════════════════════════
+// MACHINERY
+// ══════════════════════════════════════
+async function loadMachinery() {
+  document.getElementById('machinery-loading').style.display = 'flex';
+  document.getElementById('machinery-grid').style.display = 'none';
+
+  const data = await notionQuery(MACHINERY_DB_ID);
+  
+  if (!data?.results) {
+    document.getElementById('machinery-loading').style.display = 'none';
+    return;
+  }
+
+  let machines = data.results;
+  
+  // Filter by yacht if client
+  if (currentUser.role === 'client') {
+    machines = machines.filter(m => {
+      const yachtRel = getProp(m.properties, 'Yacht', 'relation');
+      return yachtRel.length > 0;
+    });
+  }
+
+  const grid = document.getElementById('machinery-grid');
+  
+  if (!machines.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚙️</div><div class="empty-text">No machinery data found</div></div>';
+  } else {
+    grid.innerHTML = machines.map(m => {
+      const p = m.properties;
+      const name = getProp(p, 'Equipment name', 'title');
+      const type = getProp(p, 'Type', 'select');
+      const manufacturer = getProp(p, 'Manufacturer', 'rich_text');
+      const model = getProp(p, 'Model', 'rich_text');
+      const hours = getProp(p, 'Running hours', 'number');
+      const serialPS = getProp(p, 'Serial number PS', 'rich_text');
+      const notes = getProp(p, 'Notes', 'rich_text');
+
+      return `
+        <div class="machine-card" onclick="showMachineDetail('${m.id}')">
+          <div class="machine-type">${type}</div>
+          <div class="machine-name">${name}</div>
+          <div class="machine-specs">
+            <div class="spec-row"><span class="spec-key">Manufacturer</span><span class="spec-val">${manufacturer}</span></div>
+            <div class="spec-row"><span class="spec-key">Model</span><span class="spec-val">${model}</span></div>
+            ${hours !== '—' ? `<div class="spec-row"><span class="spec-key">Running Hours</span><span class="spec-val">${hours}h</span></div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('machinery-loading').style.display = 'none';
+  grid.style.display = 'grid';
+}
+
+async function showMachineDetail(machineId) {
+  const machine = await notionGetPage(machineId);
+  if (!machine) return;
+  const p = machine.properties;
+
+  document.getElementById('modal-type').textContent = getProp(p, 'Type', 'select');
+  document.getElementById('modal-title').textContent = getProp(p, 'Equipment name', 'title');
+  
+  const specs = [
+    ['Manufacturer', getProp(p, 'Manufacturer', 'rich_text')],
+    ['Model', getProp(p, 'Model', 'rich_text')],
+    ['Serial No. (Port)', getProp(p, 'Serial number PS', 'rich_text')],
+    ['Serial No. (Starboard)', getProp(p, 'Serial number SB', 'rich_text')],
+    ['Running Hours', getProp(p, 'Running hours', 'number') !== '—' ? getProp(p, 'Running hours', 'number') + 'h' : '—'],
+    ['Last Service', getProp(p, 'Last service', 'date')],
+    ['Notes', getProp(p, 'Notes', 'rich_text')],
+  ].filter(([k, v]) => v && v !== '—');
+
+  document.getElementById('modal-specs').innerHTML = specs.map(([k, v]) => `
+    <div class="spec-row" style="padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+      <span class="spec-key" style="font-size:0.7rem; letter-spacing:0.1em; color:var(--gray)">${k}</span>
+      <span class="spec-val" style="font-size:0.85rem; max-width:60%; text-align:right">${v}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('machine-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('machine-modal').classList.remove('open');
+}
+
+// ══════════════════════════════════════
+// FLEET (Admin)
+// ══════════════════════════════════════
+async function loadFleet() {
+  document.getElementById('fleet-loading').style.display = 'flex';
+  document.getElementById('fleet-grid').style.display = 'none';
+
+  const data = await notionQuery(YACHT_DB_ID);
+  
+  if (!data?.results) {
+    document.getElementById('fleet-loading').style.display = 'none';
+    return;
+  }
+
+  const grid = document.getElementById('fleet-grid');
+  grid.innerHTML = data.results.map(y => {
+    const p = y.properties;
+    const name = getProp(p, 'Nome yacht', 'title');
+    const owner = getProp(p, 'Owner', 'rich_text');
+    const year = getProp(p, 'Building year', 'rich_text');
+    const size = getProp(p, 'Size', 'rich_text');
+    const manufacturer = getProp(p, 'Manufacturer', 'rich_text');
+    const model = getProp(p, 'Model', 'rich_text');
+    const porto = getProp(p, 'Porto base', 'rich_text');
+
+    return `
+      <div class="yacht-card">
+        <div class="yacht-card-name">${name}</div>
+        <div class="yacht-card-owner">${owner}</div>
+        <div class="yacht-card-specs">
+          <div class="yacht-spec"><div class="yacht-spec-val">${manufacturer} ${model}</div><div class="yacht-spec-label">Vessel</div></div>
+          <div class="yacht-spec"><div class="yacht-spec-val">${porto}</div><div class="yacht-spec-label">Port</div></div>
+          <div class="yacht-spec"><div class="yacht-spec-val">${year}</div><div class="yacht-spec-label">Year</div></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('fleet-loading').style.display = 'none';
+  grid.style.display = 'grid';
+}
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  
+  event.target.classList.add('active');
+  document.getElementById(`panel-${tab}`).classList.add('active');
+
+  if (tab === 'worklist' && !allWorks.length) loadWorklist();
+  if (tab === 'machinery') loadMachinery();
+  if (tab === 'fleet') loadFleet();
+}
+
+// Close modal on overlay click
+document.getElementById('machine-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
