@@ -13,10 +13,8 @@ exports.handler = async function(event) {
   try {
     const { path, method, body } = JSON.parse(event.body);
     const token = event.headers['x-notion-token'];
-
     if (!token) return { statusCode: 401, headers, body: JSON.stringify({ error: 'No token' }) };
 
-    const fetch = require('node-fetch');
     const response = await fetch('https://api.notion.com' + path, {
       method: method || 'GET',
       headers: {
